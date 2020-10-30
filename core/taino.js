@@ -48,6 +48,20 @@ export class Taino {
     }
   }
 
+  addStyles(files) {
+    const head = document.querySelector("head");
+    for (const file of files) {
+      // don't inject twice
+      if (head.querySelector(`[href="${file}"]`) !== null) {
+        continue;
+      }
+      const linkTag = document.createElement("link");
+      linkTag.rel = "stylesheet";
+      linkTag.href = file;
+      head.appendChild(linkTag);
+    }
+  }
+
   // LIFECYCLE
   // load page -> update title -> inject template -> setup links
 
@@ -55,10 +69,11 @@ export class Taino {
     // `PageData` should be a function
     const PageData = this.getCurrentPage(route);
     const page = await parseComponent(PageData);
-
     this.updateTitle();
 
     document.querySelector(this.#options.appEl).innerHTML = page.template;
+
+    this.addStyles([...(this.#options.css || []), ...(page.css || [])]);
 
     this.setupLocalLinks();
   }
